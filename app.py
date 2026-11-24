@@ -13,6 +13,7 @@ from matplotlib.figure import Figure
 
 from calculations import best_successful_trial, maximum_acceleration, maximum_speed
 from catalog import CATALOG
+from exports import export_trials_csv
 from models import PlacedPiece, Structure, SupportRelation, TrialRecord, TrialState
 from physics import PIXELS_PER_INCH, TABLE_Y_IN, ShakeSimulation
 from workfiles import structure_from_dict, structure_to_dict
@@ -64,6 +65,7 @@ class ShakeDownApp(tk.Tk):
         file_menu = tk.Menu(menu, tearoff=False)
         file_menu.add_command(label="Open work…", command=self._open_work)
         file_menu.add_command(label="Save work…", command=self._save_work)
+        file_menu.add_command(label="Export scoreboard CSV…", command=self._export_scores)
         file_menu.add_separator()
         file_menu.add_command(label="New empty work", command=self._new_work)
         menu.add_cascade(label="File", menu=file_menu)
@@ -77,6 +79,7 @@ class ShakeDownApp(tk.Tk):
                  bg="#16202b", font=("Arial", 11)).pack(side="left", padx=18, pady=5)
         ttk.Button(header, text="Open", command=self._open_work).pack(side="right", padx=3)
         ttk.Button(header, text="Save", command=self._save_work).pack(side="right", padx=3)
+        ttk.Button(header, text="Export CSV", command=self._export_scores).pack(side="right", padx=3)
         ttk.Button(header, text="Score board", command=self._show_scores).pack(side="right")
 
         main = tk.Frame(self, bg="#1b2430")
@@ -483,11 +486,27 @@ class ShakeDownApp(tk.Tk):
         window.transient(self)
         window.geometry("560x360")
         tk.Label(window, text="Completed trials", font=("Arial", 14, "bold")).pack(anchor="w", padx=15, pady=12)
+        ttk.Button(window, text="Export CSV", command=self._export_scores).pack(anchor="e", padx=15, pady=(0, 8))
         box = tk.Listbox(window, width=75, height=14)
         box.pack(fill="both", expand=True, padx=15)
         for index, record in enumerate(self.trials, 1):
             outcome = "qualified" if record.checkpoint_reached else f"failed: {record.failure_reason or 'unknown'}"
             box.insert("end", f"{index}. {record.amplitude_in:.1f} in / {record.frequency_hz:.1f} Hz — {outcome}")
+
+    def _export_scores(self) -> None:
+        path = filedialog.asksaveasfilename(
+            title="Export scoreboard CSV",
+            defaultextension=".csv",
+            filetypes=[("CSV scoreboard", "*.csv"), ("All files", "*.*")],
+        )
+        if not path:
+            return
+        try:
+            export_trials_csv(path, self.trials)
+        except OSError as error:
+            messagebox.showerror("Export failed", str(error))
+            return
+        self.status_var.set(f"Scoreboard exported: {Path(path).name}")
 
 
 if __name__ == "__main__":

@@ -44,6 +44,11 @@
 - Whether it worked: Yes—12 tests pass, all calculation/physics regression cases pass, work round-trip restores 8 pieces, 9 support relationships, and `$201.00` cost, and diagnostics report no errors. The app is being launched for interactive use.
 
 ## 2026-11-24
+- What I asked: Add a feature to export scoreboard results to CSV or Excel.
+- What you changed: Added CSV export support in `exports.py`, Export CSV actions in the main window, File menu, and scoreboard panel, export-specific tests, and a scoreboard-export section in `spec.md`.
+- Whether it worked: Yes—14 tests pass, CSV output contains 3 trial rows and 10 columns with the correct top-score marker and failed-piece data, all prior validation cases still pass, and diagnostics report no errors. The app is being relaunched for interactive use.
+
+## 2026-11-24
 - What I asked: Diagnose why the app could no longer be opened from the terminal.
 - What you changed: Fixed the empty-board startup bug in `app.py` by providing a default value to the piece-ID calculation when no pieces are loaded.
 - Whether it worked: Yes—the exact launch command now opens the Tkinter event loop, 8 tests pass, and the app reports no diagnostics. The process was stopped manually after confirming it stayed running.

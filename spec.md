@@ -452,6 +452,18 @@ requirements.
 ### Score board
 - Maintain a local score board that records completed trials and the top
   qualifying shake settings survived.
+- Provide an `Export CSV` action in the main window, File menu, and score-board
+  panel. Export all recorded trials as a UTF-8 CSV file that opens in Excel or
+  other spreadsheet software.
+- The CSV must include trial number, amplitude, frequency, maximum shake speed,
+  maximum acceleration, checkpoint status, survival time, failed piece ID,
+  failure reason, and whether the row is the current top qualifying score.
+- Exporting an empty score board must still create a CSV with the complete
+  header row. File errors must be reported without changing score history.
+- **Validation:** Record qualifying and failed trials, export the scoreboard,
+  open the CSV in a spreadsheet or CSV reader, and confirm every trial and the
+  top-score marker match the in-app score board. Export an empty scoreboard and
+  confirm the header row is present.
 - Store trial history locally on the user's computer, for example in a JSON
   file managed by the desktop app.
 - Keep usernames and cross-user comparison out of scope.
