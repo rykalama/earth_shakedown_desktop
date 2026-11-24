@@ -431,6 +431,24 @@ requirements.
 
 ## Features
 
+### Work files
+- Provide `Open` and `Save` actions in the desktop window and File menu.
+- Save the current editable work as a portable JSON file with a `.json`
+  extension. The file must include every placed piece's catalog type, ID,
+  position, and angle; all support relationships; weld records; and the
+  current amplitude and frequency settings.
+- Opening a work file must restore the editable structure, support graph, weld
+  records, and shake settings without loading a default structure.
+- Reject unsupported file versions, malformed JSON, and unknown catalog piece
+  types with a readable error message and leave the current work unchanged.
+- Open and Save are editing actions. Disable or refuse them while a trial is
+  running; resetting the trial returns to an editable state.
+- **Validation:** Create a work with multiple piece types and moved pieces,
+  save it, create a new empty work, open the saved file, and confirm piece
+  types, positions, support relationships, weld records, shake settings, and
+  total cost are restored. Try an invalid or unknown-piece JSON file and
+  confirm the current work remains unchanged.
+
 ### Score board
 - Maintain a local score board that records completed trials and the top
   qualifying shake settings survived.

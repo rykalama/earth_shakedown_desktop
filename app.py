@@ -6,7 +6,7 @@ import json
 import time
 import tkinter as tk
 from pathlib import Path
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -15,6 +15,7 @@ from calculations import best_successful_trial, maximum_acceleration, maximum_sp
 from catalog import CATALOG
 from models import PlacedPiece, Structure, SupportRelation, TrialRecord, TrialState
 from physics import PIXELS_PER_INCH, TABLE_Y_IN, ShakeSimulation
+from workfiles import structure_from_dict, structure_to_dict
 
 
 ROOT = Path(__file__).resolve().parent
@@ -59,12 +60,23 @@ class ShakeDownApp(tk.Tk):
         self._refresh()
 
     def _build_ui(self) -> None:
+        menu = tk.Menu(self)
+        file_menu = tk.Menu(menu, tearoff=False)
+        file_menu.add_command(label="Open work…", command=self._open_work)
+        file_menu.add_command(label="Save work…", command=self._save_work)
+        file_menu.add_separator()
+        file_menu.add_command(label="New empty work", command=self._new_work)
+        menu.add_cascade(label="File", menu=file_menu)
+        self.configure(menu=menu)
+
         header = tk.Frame(self, bg="#16202b", padx=18, pady=12)
         header.pack(fill="x")
         tk.Label(header, text="EARTHQUAKE SHAKE-DOWN", fg="#ffd166", bg="#16202b",
                  font=("Arial", 22, "bold")).pack(side="left")
         tk.Label(header, text="Build smart. Shake safely. Learn why.", fg="#b9c7d6",
                  bg="#16202b", font=("Arial", 11)).pack(side="left", padx=18, pady=5)
+        ttk.Button(header, text="Open", command=self._open_work).pack(side="right", padx=3)
+        ttk.Button(header, text="Save", command=self._save_work).pack(side="right", padx=3)
         ttk.Button(header, text="Score board", command=self._show_scores).pack(side="right")
 
         main = tk.Frame(self, bg="#1b2430")
@@ -218,6 +230,66 @@ class ShakeDownApp(tk.Tk):
         self.structure.supports.clear()
         self.structure.welds.clear()
         self.selected_piece_id = None
+        self._refresh()
+
+    def _new_work(self) -> None:
+        if self.trial_state != TrialState.EDITING:
+            messagebox.showinfo("Trial running", "Reset the trial before starting a new work file.")
+            return
+        self.structure = Structure()
+        self.selected_piece_id = None
+        self.next_piece_id = 1
+        self.status_var.set("New empty work created.")
+        self._refresh()
+
+    def _save_work(self) -> None:
+        if self.trial_state != TrialState.EDITING:
+            messagebox.showinfo("Trial running", "Reset the trial before saving your work.")
+            return
+        path = filedialog.asksaveasfilename(
+            title="Save Earthquake Shake-Down work",
+            defaultextension=".json",
+            filetypes=[("Shake-Down work", "*.json"), ("All files", "*.*")],
+        )
+        if not path:
+            return
+        data = structure_to_dict(self.structure)
+        data["shake"] = {
+            "amplitude_in": self.amplitude_var.get(),
+            "frequency_hz": self.frequency_var.get(),
+        }
+        try:
+            Path(path).write_text(json.dumps(data, indent=2), encoding="utf-8")
+        except OSError as error:
+            messagebox.showerror("Save failed", str(error))
+            return
+        self.status_var.set(f"Work saved: {Path(path).name}")
+
+    def _open_work(self) -> None:
+        if self.trial_state != TrialState.EDITING:
+            messagebox.showinfo("Trial running", "Reset the trial before opening a work file.")
+            return
+        path = filedialog.askopenfilename(
+            title="Open Earthquake Shake-Down work",
+            filetypes=[("Shake-Down work", "*.json"), ("All files", "*.*")],
+        )
+        if not path:
+            return
+        try:
+            data = json.loads(Path(path).read_text(encoding="utf-8"))
+            structure = structure_from_dict(data)
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+            messagebox.showerror("Open failed", str(error))
+            return
+        self.structure = structure
+        shake = data.get("shake", {})
+        self.amplitude_var.set(float(shake.get("amplitude_in", self.amplitude_var.get())))
+        self.frequency_var.set(float(shake.get("frequency_hz", self.frequency_var.get())))
+        self.amplitude_text.set(f"{self.amplitude_var.get():.2f}")
+        self.frequency_text.set(f"{self.frequency_var.get():.2f}")
+        self.selected_piece_id = None
+        self.next_piece_id = max((piece.piece_id for piece in self.structure.pieces), default=0) + 1
+        self.status_var.set(f"Work opened: {Path(path).name}")
         self._refresh()
 
     def _select_piece(self, event) -> None:

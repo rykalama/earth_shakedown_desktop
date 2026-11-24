@@ -39,6 +39,11 @@
 - Whether it worked: The executable calculation and lifecycle checks passed; the final report identifies UI-only or feature checks that cannot be represented as numeric beam calculations.
 
 ## 2026-11-24
+- What I asked: Add saving and opening work as files, document the feature in `spec.md`, build it, let me try it in the app, and rerun the validation cases.
+- What you changed: Added JSON work-file serialization in `workfiles.py`, Open/Save actions and File menu controls in `app.py`, round-trip and invalid-file tests, and a Work files section in `spec.md`.
+- Whether it worked: Yes—12 tests pass, all calculation/physics regression cases pass, work round-trip restores 8 pieces, 9 support relationships, and `$201.00` cost, and diagnostics report no errors. The app is being launched for interactive use.
+
+## 2026-11-24
 - What I asked: Diagnose why the app could no longer be opened from the terminal.
 - What you changed: Fixed the empty-board startup bug in `app.py` by providing a default value to the piece-ID calculation when no pieces are loaded.
 - Whether it worked: Yes—the exact launch command now opens the Tkinter event loop, 8 tests pass, and the app reports no diagnostics. The process was stopped manually after confirming it stayed running.
