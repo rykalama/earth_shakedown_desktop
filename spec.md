@@ -1,16 +1,23 @@
 # Earthquake Shake-Down
 
 ## Platform
-- Python desktop app using Tkinter, started with 'python app.py'
-- Calculations with numpy, kept in their own module, separate from the window code
-- Diagrams drawn with matplotlib, embedded in the window
+- Python desktop app using Tkinter, started with `python app.py`.
+- Use Pymunk for 2D gravity, collisions, friction, rigid-body motion, and
+  optional constraints. Do not use Matter.js or any browser physics engine.
+- Calculations with NumPy are kept in their own module, separate from the
+  window code.
+- Diagrams drawn with Matplotlib are embedded in the Tkinter window.
+- Use a controlled Tkinter timer loop (for example, `after`) to advance the
+  simulation at a bounded update rate and redraw the interface. The loop must
+  use measured elapsed time, avoid blocking the UI thread, and stop or pause
+  immediately when the trial state requires it.
 
 ## Overview
 
-Earthquake Shake-Down is a single-file web game in which users design a small
+Earthquake Shake-Down is a Python desktop app in which users design a small
 2D building and test it on a simulated shake table. Players choose structural
 pieces with real-world prices, arrange them into a building, and control the
-table's amplitude and frequency. Matter.js simulates gravity, collisions, and
+table's amplitude and frequency. Pymunk simulates gravity, collisions, and
 the resulting motion. The game ends immediately when the first piece falls,
 while the 10-second checkpoint determines whether a trial qualifies for scoring.
 The project is intended to teach basic structural and earthquake-motion
@@ -37,9 +44,15 @@ prediction of how a real building would perform in an actual earthquake.
   - horizontal beams;
   - diagonal braces or trusses;
   - optional wall panels or a roof for additional mass and lateral support.
-- Connections between pieces are represented by Matter.js contact and
-  collisions in the first implementation. Flexible joints, bolts, and
-  material failure are out of scope unless added later.
+- Beams are physics bodies only. Their dimensions, mass, collision shape, and
+  price are used by the simulation and cost model; do not calculate beam stress,
+  bending, deflection, section properties, or material strength in the first
+  implementation.
+- Connections between pieces are initially represented by Pymunk contact and
+  collisions. The application must keep explicit support relationships between
+  placed pieces, including which piece supports which other piece and the
+  contact or connection that establishes that support. Flexible joints, bolts,
+  and material failure are out of scope unless added later.
 - Each piece has a defined shape, size, mass, and price. The initial piece
   catalog must provide those values so the physics and cost calculations are
   repeatable.
@@ -56,14 +69,14 @@ prediction of how a real building would perform in an actual earthquake.
 - The interface should show short helper text or tooltips with these
   explanations so users do not need earthquake experience to use the controls.
 - The simulation uses seconds, inches, and pounds consistently in the user
-  interface. Matter.js may use its own pixel scale, but conversions must be
+  interface. Pymunk may use its own pixel scale, but conversions must be
   applied consistently at the simulation boundary.
 
 ## Calculations
 
 ### Physics model
 
-- Use the Matter.js 2D physics engine for gravity, collisions, friction, and
+- Use the Pymunk 2D physics engine for gravity, collisions, friction, and
   rigid-body motion.
 - Gravity is downward at `g = 32.174 ft/s^2` (or its equivalent in the
   simulation unit system).
@@ -118,22 +131,29 @@ prediction of how a real building would perform in an actual earthquake.
 
 ### Failure and result
 
-- A piece has fallen when it has separated from its starting position or support
-  and then makes contact with the shake pad. A piece that only remains in place
-  on the pad at the start of a trial is not considered fallen.
-- The moving pad is considered the bottom collision surface for fall detection.
-  A body crossing a canvas side or falling beyond the lower canvas boundary is
-  also recorded as fallen.
-- The game ends immediately when the first piece has completely fallen according
-  to that fall rule. If a beam, column, brace, floor, foundation, or any other
-  piece crosses the fall boundary, stop the shake and timer.
+- A piece has failed when it disconnects from a required support relationship.
+  The application must track a support graph throughout the trial, including
+  which piece supports each other piece and the contact or explicit connection
+  that establishes that support.
+- A disconnected piece is bad even if it has not yet reached the shake pad. End
+  the trial at the first disconnect event and record that piece and time.
+- A piece that later contacts the shake pad or crosses a canvas boundary is also
+  failed, but the first disconnect event is the recorded failure when it occurs.
+  A piece that only remains in place on the pad at the start of a trial is not
+  considered failed.
+- The moving pad is considered the bottom collision surface for boundary
+  reporting. A body crossing a canvas side or falling beyond the lower canvas
+  boundary is also recorded as failed when no earlier disconnect occurred.
+- The game ends immediately when the first piece fails. If a beam, column,
+  brace, floor, foundation, or any other piece disconnects or crosses the fall
+  boundary, stop the shake and timer.
 - Ten seconds is the minimum successful-survival checkpoint, not a hard trial
   limit. A structure that survives for 10 seconds or longer has reached the
   successful-survival state until a piece falls.
 - A trial qualifies as a successful 10-second trial once no piece has fallen by
   the 10-second checkpoint. Report the amplitude, frequency, maximum
   acceleration, and total survival time.
-- If a piece falls before 10 seconds, report the failed piece and
+- If a piece disconnects or falls before 10 seconds, report the failed piece and
   its elapsed time. The trial does not qualify as a successful 10-second trial,
   and the simulation stops immediately.
 - Compare successful trials using the maximum acceleration `a_max`; the score
@@ -240,27 +260,24 @@ t = 0.558
 
 ## Build Stages
 
-After each stage is completed, run the app and provide a browser-openable
-preview link with the stage update. During development, use a local preview
-URL such as `http://localhost:<port>`. After Stage 8 is published, provide the
-live GitHub Pages URL instead. The link should open the current version that
-was actually verified for that stage.
+After each stage is completed, run the Tkinter app and report the verified
+local result. The app is a desktop application; do not create `index.html`,
+GitHub Pages files, browser preview URLs, or browser-only implementation
+requirements.
 
 ### Stage 1: Project foundation
 
-- Keep the app in the root `index.html` file for GitHub Pages.
-- Add the initial HTML structure, stylesheet, and JavaScript modules or
-  sections without adding a build dependency.
-- Establish the canvas or simulation area, control panel, status area, and
-  responsive page layout.
+- Create the initial Python entry point and Tkinter window without a build
+  dependency.
+- Establish the simulation area, control panel, status area, and resizable
+  desktop layout.
 - Add the amplitude and frequency sliders and smaller numeric inputs beneath
   them in the left control panel, with units and helper descriptions. Keep the
   two input methods synchronized and visually distinct.
-- **Validation:** Open `index.html` in a browser and confirm the page loads
-  without console errors, all planned regions are visible, and the layout
-  remains usable at desktop and narrow viewport widths. Enter nonnegative
-  values in the compact numeric fields beneath the sliders and move both
-  sliders. Confirm each slider and its matching numeric field stay
+- **Validation:** Run `python app.py`, confirm the window opens without errors,
+  all planned regions are visible, and resizing remains usable. Enter
+  nonnegative values in the compact numeric fields beneath the sliders and
+  move both sliders. Confirm each slider and its matching numeric field stay
   synchronized without errors.
 
 ### Stage 2: Piece catalog and data
@@ -268,7 +285,7 @@ was actually verified for that stage.
 - Define the initial piece catalog in `01_data`, including type, dimensions,
   mass, shape, real-world price, and price source.
 - Include at least a base, floor, column, beam, and brace or truss.
-- Create a consistent mapping from catalog dimensions to Matter.js simulation
+- Create a consistent mapping from catalog dimensions to Pymunk simulation
   units.
 - **Validation:** Inspect every catalog entry and confirm it has a type,
   dimensions, mass, shape, price, and source. Independently sum a sample set
@@ -298,8 +315,7 @@ was actually verified for that stage.
 
 ### Stage 4: Physics and shake table
 
-- Load Matter.js from the selected CDN script and initialize it with gravity,
-  collision boundaries, and the table.
+- Initialize Pymunk with gravity, collision boundaries, and the table.
 - Add the sinusoidal horizontal table motion using the amplitude and frequency
   inputs. Move the table as a kinematic/static body by position so the
   documented displacement is applied consistently.
@@ -309,6 +325,10 @@ was actually verified for that stage.
   piece shapes respond to lateral table movement through collisions and friction.
 - Use enough collision iterations for pieces to remain stable at low motion and
   separate or fall realistically under stronger motion.
+- Advance the physics with a controlled Tkinter timer loop using measured
+  elapsed time. Keep animation and UI updates on the Tkinter event loop, avoid
+  blocking the UI thread, and stop scheduling updates when the trial is paused,
+  reset, or failed.
 - Provide a prominent `Start shaking` button next to the Simulation area
   heading and a reset control. Starting the preview temporarily locks
   structure editing; resetting restores the design editor without changing the
@@ -329,17 +349,21 @@ was actually verified for that stage.
 - Turn the Stage 4 physics preview into a trial with Start, Pause/Resume, and
   Reset controls.
 - Display elapsed trial time and the current trial state beneath the simulation.
-- Detect when a piece separates from the structure, touches the moving shake pad,
-  and record that piece as fallen.
+- Detect when a piece loses a required support relationship, touches the moving
+  shake pad, or crosses a boundary, and record the first failure event.
+- Maintain and update the support graph as contacts change. A lost required
+  support relationship ends the trial immediately, even before pad contact.
 - Record each fallen piece and its fall time.
 - Mark the 10-second checkpoint when no piece has fallen.
-- End the trial immediately after the first piece falls. Resetting must restore the
-  original design so it can be tried again.
+- End the trial immediately after the first piece disconnects or falls. Resetting
+  must restore the original design and support relationships so it can be tried
+  again.
 - **Validation:** Start a stable trial and confirm the elapsed timer runs and
   the 10-second checkpoint appears without stopping the simulation. Pause and
   resume the trial and confirm elapsed time stops and continues appropriately.
-  Start a deliberately unstable trial and confirm the fallen piece is recorded,
-  the shake and timer stop immediately, and reset restores the original structure.
+  Start a deliberately unstable trial and confirm the disconnected or fallen
+  piece is recorded, the shake and timer stop immediately, and reset restores
+  the original structure.
 
 ### Stage 6: Scoring and results
 
@@ -368,38 +392,35 @@ was actually verified for that stage.
   verify readable contrast over the mountain background, and confirm the
   simulation remains understandable when the background image is unavailable.
 
-### Stage 8: Validation and publishing
+### Stage 8: Validation
 
 - Run the free-fall and shake-motion checks in the Validation section.
 - Test zero amplitude, zero frequency, duplicate pieces, piece removal, early
   falls, survival beyond 10 seconds, and first-piece trial ending.
 - Check that cost totals and score selection match hand calculations.
-- Test the single-file app in a browser and publish the root `index.html` with
-  GitHub Pages.
-- Publishing requires a configured GitHub `origin` remote. Until the repository
-  URL is provided and the remote is configured, provide the verified local
-  preview and document the live-Pages URL as pending.
-- **Validation:** Run the complete checklist from Stages 1-7, verify the
-  published link loads the same tested version, and confirm no console errors
-  occur during a complete build-and-test session.
+- Run the desktop app and complete the checklist from Stages 1-7. Verify the
+  same tested source runs with `python app.py`, confirm no unhandled errors
+  occur, and verify the controlled timer loop, support-disconnection failure,
+  and reset behavior during a complete test session.
 
 ## Features
 
 ### Score board
 - Maintain a local score board that records completed trials and the top
   qualifying shake settings survived.
-- Store trial history in the user's browser using local browser storage.
+- Store trial history locally on the user's computer, for example in a JSON
+  file managed by the desktop app.
 - Keep usernames and cross-user comparison out of scope.
 - Do not require a server, account, authentication, API, or network database.
-- Provide a fixed Score board button in the upper-right corner of the page.
+- Provide a fixed Score board button in the upper-right corner of the window.
 - Opening the button shows a local score-board panel on top of the page.
 - Place an X close button in the upper-left corner of the score-board panel.
 - The panel includes the highest qualifying score and persisted trial history.
 - Close the panel with the X button, the Escape key, or by clicking outside
   it. Return keyboard focus to the Score board button after closing.
-- Treat stored scores as local to the browser/device; refreshing or reopening
-  the app must retain them.
-- Clearing browser storage removes the local score board.
+- Treat stored scores as local to the computer; closing and reopening the app
+  must retain them.
+- Clearing or resetting the local score data removes the local score board.
 
 ### Welds and Connections
 - Include a mode where the player can add welds and connections to joints for
@@ -413,9 +434,9 @@ was actually verified for that stage.
 - Welds are free and persist for the structure until pieces are removed or the
   structure is cleared. Reset trial restores the design editor and keeps welded
   joints; a new structure can add new welds.
-- During physics, welded pieces use rigid Matter.js constraints so they resist
+- During physics, welded pieces use rigid Pymunk constraints so they resist
   separation and rotation more strongly than separate colliding pieces.
-- Weld connections remain local to the browser and do not affect the catalog
+- Weld connections remain local to the desktop app and do not affect the catalog
   price or cross-user features.
 - **Validation:** Run at 5 in / 5 Hz with no fall until 10 seconds and confirm
   Welds and Connections becomes visible and remains visible after reload.
