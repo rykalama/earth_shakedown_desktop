@@ -54,6 +54,11 @@
 - Whether it worked: Yes—14 tests passed, all executable validation cases passed, and app/export/work-file diagnostics reported no errors.
 
 ## 2026-11-24
+- What I asked: Write a short README explaining what the app does, which packages to install, and the command to start it.
+- What you changed: Added `README.md` with the app overview, dependency installation command, package list, and launch command.
+- Whether it worked: Yes—the requested README was created.
+
+## 2026-11-24
 - What I asked: Diagnose why the app could no longer be opened from the terminal.
 - What you changed: Fixed the empty-board startup bug in `app.py` by providing a default value to the piece-ID calculation when no pieces are loaded.
 - Whether it worked: Yes—the exact launch command now opens the Tkinter event loop, 8 tests pass, and the app reports no diagnostics. The process was stopped manually after confirming it stayed running.
