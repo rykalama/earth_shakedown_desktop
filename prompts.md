@@ -59,6 +59,11 @@
 - Whether it worked: Yes—the requested README was created.
 
 ## 2026-11-24
+- What I asked: Add a validation results section to `spec.md` with the earlier expected-versus-actual table.
+- What you changed: Added the latest validation results table to the Validation section of `spec.md`, covering calculations, physics, support failures, work files, CSV export, scoring, and the automated test suite.
+- Whether it worked: Yes—the requested table was added.
+
+## 2026-11-24
 - What I asked: Diagnose why the app could no longer be opened from the terminal.
 - What you changed: Fixed the empty-board startup bug in `app.py` by providing a default value to the piece-ID calculation when no pieces are loaded.
 - Whether it worked: Yes—the exact launch command now opens the Tkinter event loop, 8 tests pass, and the app reports no diagnostics. The process was stopped manually after confirming it stayed running.

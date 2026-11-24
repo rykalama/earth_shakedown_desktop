@@ -264,6 +264,28 @@ t = 0.558
 - Verify that the game ends and the timer stops immediately after the first
   piece falls.
 
+### Validation results
+
+Latest validation run results for the implemented calculations, physics,
+support tracking, work files, and scoreboard export:
+
+| Validation | Expected | Actual | Result |
+| --- | --- | --- | --- |
+| Free fall: 3 ft | 0.432 s | 0.431840 s | Pass |
+| Free fall: 4 ft | 0.498 s | 0.498646 s | Pass |
+| Free fall: 5 ft | 0.558 s | 0.557503 s | Pass |
+| Zero amplitude | Displacement and acceleration are 0 | 0.0 and 0.0 | Pass |
+| Zero frequency | Displacement is constant and maximum acceleration is 0 | 0.0 and 0.0 | Pass |
+| Double amplitude | Maximum acceleration doubles | 2.0× | Pass |
+| Double frequency | Maximum acceleration quadruples | 4.0× | Pass |
+| Stable 10-second run | No failure before checkpoint | No failure | Pass |
+| Support disconnection | Trial fails | Piece 4 failed | Pass |
+| Piece falls off table | Trial fails | Piece 1 failed | Pass |
+| Work-file round trip | Structure is restored | 8 pieces, 9 supports, `$201.00` | Pass |
+| Scoreboard CSV export | Results are exported | 3 rows, 10 columns | Pass |
+| Score tie-breaker | Higher frequency wins | 5 Hz selected | Pass |
+| Full automated test suite | All tests pass | 14 passed | Pass |
+
 ## Out of scope
 
 - Do not show the actual displacement or acceleration waves.
