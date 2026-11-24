@@ -128,5 +128,15 @@
     "survival_time_s": 20.31006339995656,
     "failed_piece_id": 1,
     "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 2.0,
+    "frequency_hz": 2.0,
+    "max_speed_ft_s": 2.0943951023931953,
+    "max_acceleration_ft_s2": 26.31894506957162,
+    "checkpoint_reached": false,
+    "survival_time_s": 0.5102642000420019,
+    "failed_piece_id": 2,
+    "failure_reason": "required support disconnected"
   }
 ]

@@ -34,6 +34,11 @@
 - Whether it worked: Yes—10 tests pass, the smoke check detects a separated floor as `required support disconnected`, and diagnostics report no errors.
 
 ## 2026-11-24
+- What I asked: Run all validation cases in `spec.md` against the app's beam/shake calculations and report expected versus actual values in a table.
+- What you changed: Ran the full numeric validation set, the regression suite, live Tkinter checkpoint, pause/resume/reset, support-disconnection, table fall-off, and score tie-break scenarios. No application code was changed.
+- Whether it worked: The executable calculation and lifecycle checks passed; the final report identifies UI-only or feature checks that cannot be represented as numeric beam calculations.
+
+## 2026-11-24
 - What I asked: Diagnose why the app could no longer be opened from the terminal.
 - What you changed: Fixed the empty-board startup bug in `app.py` by providing a default value to the piece-ID calculation when no pieces are loaded.
 - Whether it worked: Yes—the exact launch command now opens the Tkinter event loop, 8 tests pass, and the app reports no diagnostics. The process was stopped manually after confirming it stayed running.
