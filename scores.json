@@ -18,5 +18,115 @@
     "survival_time_s": 0.0004412999842315912,
     "failed_piece_id": 14,
     "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 5.0,
+    "frequency_hz": 1.0,
+    "max_speed_ft_s": 2.6179938779914944,
+    "max_acceleration_ft_s2": 16.449340668482265,
+    "checkpoint_reached": false,
+    "survival_time_s": 0.0004616000223904848,
+    "failed_piece_id": 14,
+    "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 2.0,
+    "frequency_hz": 2.0,
+    "max_speed_ft_s": 2.0943951023931953,
+    "max_acceleration_ft_s2": 26.31894506957162,
+    "checkpoint_reached": false,
+    "survival_time_s": 0.3347275999840349,
+    "failed_piece_id": 8,
+    "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 0.6,
+    "frequency_hz": 0.4,
+    "max_speed_ft_s": 0.1256637061435917,
+    "max_acceleration_ft_s2": 0.3158273408348594,
+    "checkpoint_reached": false,
+    "survival_time_s": 0.0007139000808820128,
+    "failed_piece_id": 10,
+    "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 0.6,
+    "frequency_hz": 0.4,
+    "max_speed_ft_s": 0.1256637061435917,
+    "max_acceleration_ft_s2": 0.3158273408348594,
+    "checkpoint_reached": false,
+    "survival_time_s": 0.00048429996240884066,
+    "failed_piece_id": 10,
+    "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 0.6,
+    "frequency_hz": 0.4,
+    "max_speed_ft_s": 0.1256637061435917,
+    "max_acceleration_ft_s2": 0.3158273408348594,
+    "checkpoint_reached": true,
+    "survival_time_s": 10.78327769995667,
+    "failed_piece_id": null,
+    "failure_reason": ""
+  },
+  {
+    "amplitude_in": 5.2,
+    "frequency_hz": 2.8,
+    "max_speed_ft_s": 7.623598172711231,
+    "max_acceleration_ft_s2": 134.12134407453698,
+    "checkpoint_reached": true,
+    "survival_time_s": 16.50844069989398,
+    "failed_piece_id": null,
+    "failure_reason": ""
+  },
+  {
+    "amplitude_in": 9.8,
+    "frequency_hz": 8.0,
+    "max_speed_ft_s": 41.050144006906635,
+    "max_acceleration_ft_s2": 2063.405293454415,
+    "checkpoint_reached": true,
+    "survival_time_s": 15.407518300111406,
+    "failed_piece_id": 2,
+    "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 2.0,
+    "frequency_hz": 2.0,
+    "max_speed_ft_s": 2.0943951023931953,
+    "max_acceleration_ft_s2": 26.31894506957162,
+    "checkpoint_reached": true,
+    "survival_time_s": 13.250435399939306,
+    "failed_piece_id": null,
+    "failure_reason": ""
+  },
+  {
+    "amplitude_in": 5.0,
+    "frequency_hz": 5.0,
+    "max_speed_ft_s": 13.089969389957473,
+    "max_acceleration_ft_s2": 411.2335167120566,
+    "checkpoint_reached": true,
+    "survival_time_s": 27.254537799977697,
+    "failed_piece_id": null,
+    "failure_reason": ""
+  },
+  {
+    "amplitude_in": 10.9,
+    "frequency_hz": 8.0,
+    "max_speed_ft_s": 45.65781323217166,
+    "max_acceleration_ft_s2": 2295.0120100666454,
+    "checkpoint_reached": false,
+    "survival_time_s": 6.691682300064713,
+    "failed_piece_id": 1,
+    "failure_reason": "required support disconnected"
+  },
+  {
+    "amplitude_in": 10.9,
+    "frequency_hz": 8.0,
+    "max_speed_ft_s": 45.65781323217166,
+    "max_acceleration_ft_s2": 2295.0120100666454,
+    "checkpoint_reached": true,
+    "survival_time_s": 20.31006339995656,
+    "failed_piece_id": 1,
+    "failure_reason": "required support disconnected"
   }
 ]

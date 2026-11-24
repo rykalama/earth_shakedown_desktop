@@ -12,8 +12,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 from calculations import best_successful_trial, maximum_acceleration, maximum_speed
-from catalog import CATALOG, default_structure
-from models import PlacedPiece, TrialRecord, TrialState
+from catalog import CATALOG
+from models import PlacedPiece, Structure, SupportRelation, TrialRecord, TrialState
 from physics import PIXELS_PER_INCH, TABLE_Y_IN, ShakeSimulation
 
 
@@ -29,7 +29,8 @@ class ShakeDownApp(tk.Tk):
         self.minsize(980, 650)
         self.configure(bg="#1b2430")
 
-        self.structure = default_structure()
+        # Start with an empty board so the player designs the structure.
+        self.structure = Structure()
         self.simulation: ShakeSimulation | None = None
         self.trial_state = TrialState.EDITING
         self.trial_started_at = 0.0
@@ -39,7 +40,8 @@ class ShakeDownApp(tk.Tk):
         self.failure_reason = ""
         self.trials: list[TrialRecord] = self._load_scores()
         self.selected_piece_id: int | None = None
-        self.next_piece_id = max(piece.piece_id for piece in self.structure.pieces) + 1
+        self.drag_offset = (0.0, 0.0)
+        self.next_piece_id = max((piece.piece_id for piece in self.structure.pieces), default=0) + 1
 
         self.amplitude_var = tk.DoubleVar(value=2.0)
         self.frequency_var = tk.DoubleVar(value=2.0)
@@ -120,6 +122,8 @@ class ShakeDownApp(tk.Tk):
         self.canvas = tk.Canvas(content, bg="#b8d5e5", highlightthickness=0)
         self.canvas.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
         self.canvas.bind("<Button-1>", self._select_piece)
+        self.canvas.bind("<B1-Motion>", self._drag_piece)
+        self.canvas.bind("<ButtonRelease-1>", self._release_piece)
         chart_frame = tk.Frame(content, bg="#ffffff")
         chart_frame.grid(row=0, column=1, sticky="nsew")
         self.figure = Figure(figsize=(2.4, 3), dpi=90)
@@ -188,8 +192,11 @@ class ShakeDownApp(tk.Tk):
         self.next_piece_id += 1
         self.structure.pieces.append(piece)
         parent = min(self.structure.pieces[:-1], key=lambda item: abs(item.y_in - (y + 30)), default=None)
-        self.structure.supports.append(__import__("models").SupportRelation(piece.piece_id,
-                                                                            parent.piece_id if parent else 1))
+        self.structure.supports.append(SupportRelation(
+            piece.piece_id,
+            parent.piece_id if parent else None,
+            "contact" if parent else "table",
+        ))
         self._refresh()
 
     def _remove_selected(self) -> None:
@@ -216,13 +223,38 @@ class ShakeDownApp(tk.Tk):
     def _select_piece(self, event) -> None:
         if self.trial_state != TrialState.EDITING:
             return
-        x, y = event.x / PIXELS_PER_INCH, event.y / PIXELS_PER_INCH
+        x, y = self._canvas_to_world(event.x, event.y)
         self.selected_piece_id = None
         for piece in reversed(self.structure.pieces):
             if abs(x - piece.x_in) <= piece.definition.width_in / 2 and abs(y - piece.y_in) <= piece.definition.height_in / 2:
                 self.selected_piece_id = piece.piece_id
+                self.drag_offset = (piece.x_in - x, piece.y_in - y)
                 break
         self._refresh()
+
+    def _drag_piece(self, event) -> None:
+        if self.trial_state != TrialState.EDITING or self.selected_piece_id is None:
+            return
+        x, y = self._canvas_to_world(event.x, event.y)
+        for piece in self.structure.pieces:
+            if piece.piece_id == self.selected_piece_id:
+                piece.x_in = min(345.0, max(15.0, x + self.drag_offset[0]))
+                piece.y_in = min(TABLE_Y_IN - 5.0, max(20.0, y + self.drag_offset[1]))
+                break
+        self._refresh()
+
+    def _release_piece(self, _event) -> None:
+        self.drag_offset = (0.0, 0.0)
+
+    def _view_geometry(self) -> tuple[float, float, float]:
+        width = max(1, self.canvas.winfo_width())
+        height = max(1, self.canvas.winfo_height())
+        scale = min((width - 40) / 360.0, (height - 40) / 390.0)
+        return max(0.5, scale), 20.0, 20.0
+
+    def _canvas_to_world(self, canvas_x: float, canvas_y: float) -> tuple[float, float]:
+        scale, offset_x, offset_y = self._view_geometry()
+        return ((canvas_x - offset_x) / scale, (canvas_y - offset_y) / scale)
 
     def _start_trial(self) -> None:
         if len(self.structure.pieces) == 0:
@@ -321,13 +353,22 @@ class ShakeDownApp(tk.Tk):
 
     def _draw_simulation(self) -> None:
         self.canvas.delete("all")
-        width = max(600, self.canvas.winfo_width())
-        height = max(420, self.canvas.winfo_height())
+        width = max(1, self.canvas.winfo_width())
+        height = max(1, self.canvas.winfo_height())
+        scale, offset_x, offset_y = self._view_geometry()
         self.canvas.create_rectangle(0, 0, width, height, fill="#b8d5e5", outline="")
         self.canvas.create_text(18, 18, anchor="nw", text="Shake table / building view",
                                fill="#263445", font=("Arial", 12, "bold"))
-        self.canvas.create_rectangle(30, TABLE_Y_IN * PIXELS_PER_INCH, width - 30,
-                                     TABLE_Y_IN * PIXELS_PER_INCH + 14, fill="#4b5563", outline="#202733")
+        table_x = 180.0
+        if self.simulation is not None:
+            table_x = self.simulation.table_body.position.x / PIXELS_PER_INCH
+        table_left = (table_x - 110) * scale + offset_x
+        table_right = (table_x + 110) * scale + offset_x
+        table_y = TABLE_Y_IN * scale + offset_y
+        self.canvas.create_rectangle(table_left, table_y, table_right, table_y + max(8, 10 * scale),
+                                     fill="#4b5563", outline="#202733", width=2)
+        self.canvas.create_text(table_x * scale + offset_x, table_y + max(8, 10 * scale) + 5,
+                                text="SHAKE TABLE", fill="#263445", font=("Arial", 8, "bold"))
         positions = self.simulation.positions_in_inches() if self.simulation else {
             piece.piece_id: (piece.x_in, piece.y_in, piece.angle_deg) for piece in self.structure.pieces
         }
@@ -335,11 +376,11 @@ class ShakeDownApp(tk.Tk):
             x, y, angle = positions.get(piece.piece_id, (piece.x_in, piece.y_in, piece.angle_deg))
             w, h = piece.definition.width_in, piece.definition.height_in
             selected = piece.piece_id == self.selected_piece_id
-            self.canvas.create_rectangle((x - w / 2) * PIXELS_PER_INCH, (y - h / 2) * PIXELS_PER_INCH,
-                                         (x + w / 2) * PIXELS_PER_INCH, (y + h / 2) * PIXELS_PER_INCH,
+            self.canvas.create_rectangle((x - w / 2) * scale + offset_x, (y - h / 2) * scale + offset_y,
+                                         (x + w / 2) * scale + offset_x, (y + h / 2) * scale + offset_y,
                                          fill=piece.definition.color, outline="#ffdf70" if selected else "#263445",
                                          width=3 if selected else 1)
-            self.canvas.create_text(x * PIXELS_PER_INCH, y * PIXELS_PER_INCH,
+            self.canvas.create_text(x * scale + offset_x, y * scale + offset_y,
                                    text=str(piece.piece_id), fill="#ffffff", font=("Arial", 9, "bold"))
 
     def _draw_chart(self) -> None:

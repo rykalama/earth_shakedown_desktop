@@ -12,3 +12,28 @@
 - What I asked: Build the Python Tkinter/Pymunk earthquake shake-down app according to the updated plan and `spec.md`.
 - What you changed: Created the app entry point, shared models, piece catalog, NumPy calculations, Pymunk simulation with support-relationship tracking, local score persistence, requirements file, and focused tests. Added checkpoint-trial recording on reset and installed the required runtime/test packages in the selected Python environment.
 - Whether it worked: Yes—syntax compilation passed, all six tests passed, module imports succeeded, Pymunk smoke testing passed for the initial zero-shake steps, and editor diagnostics reported no errors. Interactive GUI behavior still requires running `python app.py` in a desktop session.
+
+## 2026-11-24
+- What I asked: Fix the inability to move pieces and make the shake table appear and shake.
+- What you changed: Added canvas drag-and-drop piece movement, responsive world-to-canvas coordinate mapping, visible table rendering, animated table positioning, and correct inch conversion at the Pymunk simulation boundary.
+- Whether it worked: Yes—six tests pass, the table smoke check reports a changed table position under shaking, and app/physics diagnostics report no errors.
+
+## 2026-11-24
+- What I asked: Remove the default structure at startup and make the physics less precise and more forgiving so pieces do not need to be touching at trial start.
+- What you changed: The app now starts with an empty board, the first added piece is table-supported, and support validation uses broad center-distance tolerances instead of exact contact geometry while still detecting large separations.
+- Whether it worked: Yes—8 tests pass, including empty-board and relaxed-support regression checks, and diagnostics report no errors.
+
+## 2026-11-24
+- What I asked: Make any column or other piece that falls off the shake table, or disconnects, fail the test, and record this behavior plus the recent changes in `spec.md`.
+- What you changed: Added explicit fall-off detection for every piece, gave physical fall-off precedence over cascading support failures, added a regression test, and updated `spec.md` with the failure rule and recent empty-board, dragging, forgiving-support, visible-table, and unit-conversion changes.
+- Whether it worked: Yes—9 tests pass, compilation passes, and all changed Python files report no diagnostics.
+
+## 2026-11-24
+- What I asked: Make every structural separation fail the test, including columns disconnecting from foundations, floors disconnecting from columns, and any other support combination.
+- What you changed: Added per-support starting relative-position tracking, including foundation-to-table support, and fail when any child materially separates from its recorded parent relationship while preserving forgiving initial gaps. Added regression coverage for columns, floors, beams, and roofs, and documented the rule in `spec.md`.
+- Whether it worked: Yes—10 tests pass, the smoke check detects a separated floor as `required support disconnected`, and diagnostics report no errors.
+
+## 2026-11-24
+- What I asked: Diagnose why the app could no longer be opened from the terminal.
+- What you changed: Fixed the empty-board startup bug in `app.py` by providing a default value to the piece-ID calculation when no pieces are loaded.
+- Whether it worked: Yes—the exact launch command now opens the Tkinter event loop, 8 tests pass, and the app reports no diagnostics. The process was stopped manually after confirming it stayed running.

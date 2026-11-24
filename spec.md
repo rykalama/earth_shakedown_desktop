@@ -53,6 +53,8 @@ prediction of how a real building would perform in an actual earthquake.
   placed pieces, including which piece supports which other piece and the
   contact or connection that establishes that support. Flexible joints, bolts,
   and material failure are out of scope unless added later.
+- The board starts empty when the desktop app opens. The player adds and
+  arranges pieces manually; there is no automatically loaded default building.
 - Each piece has a defined shape, size, mass, and price. The initial piece
   catalog must provide those values so the physics and cost calculations are
   repeatable.
@@ -135,12 +137,22 @@ prediction of how a real building would perform in an actual earthquake.
   The application must track a support graph throughout the trial, including
   which piece supports each other piece and the contact or explicit connection
   that establishes that support.
+- At trial start, record each support relationship's relative child-to-parent
+  position, including the foundation-to-table relationship. Initial gaps are
+  allowed, but the trial must fail when a child moves materially away from its
+  recorded parent relationship. This applies to every combination of pieces,
+  including columns from foundations, floors from columns, beams from floors,
+  braces from floors, and roofs or panels from beams.
 - A disconnected piece is bad even if it has not yet reached the shake pad. End
   the trial at the first disconnect event and record that piece and time.
 - A piece that later contacts the shake pad or crosses a canvas boundary is also
   failed, but the first disconnect event is the recorded failure when it occurs.
   A piece that only remains in place on the pad at the start of a trial is not
   considered failed.
+- Any column, beam, brace, floor, foundation, roof, wall, or other placed piece
+  that leaves the horizontal bounds of the moving shake table, falls below the
+  table boundary, or leaves the simulation area fails the trial immediately.
+  This is a separate fall-off check from support-disconnection detection.
 - The moving pad is considered the bottom collision surface for boundary
   reporting. A body crossing a canvas side or falling beyond the lower canvas
   boundary is also recorded as failed when no earlier disconnect occurred.
@@ -164,7 +176,8 @@ prediction of how a real building would perform in an actual earthquake.
 ## Outputs
 
 - The table shakes according to the selected amplitude and frequency until the
-  first disconnecting piece contacts the pad or leaves the table boundary.
+  first piece disconnects, falls off the shake table, or leaves the simulation
+  boundary.
 - Show the current amplitude, frequency, elapsed time, trial status, total
   piece cost, and final score. Mark when the 10-second checkpoint is reached
   and continue showing the elapsed time afterward.
@@ -182,8 +195,8 @@ prediction of how a real building would perform in an actual earthquake.
   frequency as the tie-breaker.
 - If no trial reaches the 10-second checkpoint, report that no qualifying score
   has been achieved instead of assigning a partial score.
-- When a piece falls, identify it and show its elapsed fall time. End the game
-  immediately and freeze the trial timer.
+- When a piece disconnects or falls off the table, identify it and show its
+  elapsed failure time. End the game immediately and freeze the trial timer.
 
 ## Look and feel
 
@@ -304,6 +317,9 @@ requirements.
   highlights, and brace fasteners without making labels or controls difficult
   to read.
 - Support selecting, moving, and removing pieces before a trial starts.
+- Start with an empty simulation area and let the player drag each added piece
+  into position. The initial support graph may contain broad, forgiving support
+  relationships; pieces do not need exact edge-to-edge contact at trial start.
 - Update the displayed piece count and total cost whenever the structure
   changes.
 - Prevent editing while a trial is running, or provide a clear reset action.
@@ -321,6 +337,9 @@ requirements.
   documented displacement is applied consistently.
 - Apply the documented unit conversions and show the current shaking values.
 - Apply each catalog piece's simulated mass and stable collision properties.
+- Treat the shake table as a visible moving boundary. Apply table displacement
+  and velocity in the simulation unit system after converting the documented
+  feet-based motion back to the table's inch-based geometry.
 - Use table position and velocity together in the sinusoidal motion so different
   piece shapes respond to lateral table movement through collisions and friction.
 - Use enough collision iterations for pieces to remain stable at low motion and
@@ -353,6 +372,13 @@ requirements.
   shake pad, or crosses a boundary, and record the first failure event.
 - Maintain and update the support graph as contacts change. A lost required
   support relationship ends the trial immediately, even before pad contact.
+- Compare each child-parent relationship with its recorded starting relative
+  position using forgiving displacement tolerances. Do not require exact
+  edge-to-edge contact at time zero, but fail as soon as the structure visibly
+  comes apart during the trial.
+- Detect when any placed piece leaves the horizontal table bounds, falls below
+  the table, or exits the simulation area. Columns and all other piece types
+  use the same immediate fall-off failure rule.
 - Record each fallen piece and its fall time.
 - Mark the 10-second checkpoint when no piece has fallen.
 - End the trial immediately after the first piece disconnects or falls. Resetting
@@ -362,8 +388,8 @@ requirements.
   the 10-second checkpoint appears without stopping the simulation. Pause and
   resume the trial and confirm elapsed time stops and continues appropriately.
   Start a deliberately unstable trial and confirm the disconnected or fallen
-  piece is recorded, the shake and timer stop immediately, and reset restores
-  the original structure.
+  piece is recorded for columns, floors, beams, braces, and roofs, the shake and
+  timer stop immediately, and reset restores the original structure.
 
 ### Stage 6: Scoring and results
 
