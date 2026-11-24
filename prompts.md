@@ -49,6 +49,11 @@
 - Whether it worked: Yes—14 tests pass, CSV output contains 3 trial rows and 10 columns with the correct top-score marker and failed-piece data, all prior validation cases still pass, and diagnostics report no errors. The app is being relaunched for interactive use.
 
 ## 2026-11-24
+- What I asked: Rerun the validation cases one more time to make sure everything still works.
+- What you changed: No application code was changed; reran compilation, the full test suite, numeric shake/free-fall checks, checkpoint and separation checks, work-file round trip, CSV export, catalog cost, and score tie-break validation.
+- Whether it worked: Yes—14 tests passed, all executable validation cases passed, and app/export/work-file diagnostics reported no errors.
+
+## 2026-11-24
 - What I asked: Diagnose why the app could no longer be opened from the terminal.
 - What you changed: Fixed the empty-board startup bug in `app.py` by providing a default value to the piece-ID calculation when no pieces are loaded.
 - Whether it worked: Yes—the exact launch command now opens the Tkinter event loop, 8 tests pass, and the app reports no diagnostics. The process was stopped manually after confirming it stayed running.
