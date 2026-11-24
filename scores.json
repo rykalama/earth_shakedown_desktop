@@ -1,0 +1,22 @@
+[
+  {
+    "amplitude_in": 5.0,
+    "frequency_hz": 1.0,
+    "max_speed_ft_s": 2.6179938779914944,
+    "max_acceleration_ft_s2": 16.449340668482265,
+    "checkpoint_reached": true,
+    "survival_time_s": 10.288163300021552,
+    "failed_piece_id": null,
+    "failure_reason": ""
+  },
+  {
+    "amplitude_in": 5.0,
+    "frequency_hz": 1.0,
+    "max_speed_ft_s": 2.6179938779914944,
+    "max_acceleration_ft_s2": 16.449340668482265,
+    "checkpoint_reached": false,
+    "survival_time_s": 0.0004412999842315912,
+    "failed_piece_id": 14,
+    "failure_reason": "required support disconnected"
+  }
+]
