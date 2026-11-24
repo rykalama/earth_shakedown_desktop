@@ -1,5 +1,10 @@
 # Earthquake Shake-Down
 
+## Platform
+- Python desktop app using Tkinter, started with 'python app.py'
+- Calculations with numpy, kept in their own module, separate from the window code
+- Diagrams drawn with matplotlib, embedded in the window
+
 ## Overview
 
 Earthquake Shake-Down is a single-file web game in which users design a small
@@ -189,6 +194,7 @@ prediction of how a real building would perform in an actual earthquake.
 - The mountain image should be decorative rather than required to understand
   or operate the game. Provide appropriate alternative text or mark it as
   decorative when the image is implemented.
+- Allow the window to be resized.
 
 ## Validation
 
@@ -198,18 +204,20 @@ For an object released from rest with no table contact, use:
 
 `t = sqrt(2h/g)`
 
-Using `g = 32.174 ft/s^2` and `h = 3 ft`:
+Case #1
+g = 32.174 ft/s^2
+h = 3 ft
+t = 0.432
 
-`t = sqrt((2 * 3) / 32.174) = 0.432 s`
+Case #2
+g = 32.174 ft/s^2
+h = 4 ft
+t = 0.498
 
-The previous value of `0.782 s` does not match 3 ft. It matches approximately
-3 m when `g = 9.81 m/s^2`:
-
-`sqrt((2 * 3 m) / 9.81 m/s^2) = 0.782 s`
-
-The implementation and test case must use one unit system consistently. Until
-the height unit is confirmed, treat `3 ft -> 0.432 s` as the expected
-feet-based test and retain `3 m -> 0.782 s` as the metric comparison.
+Case #3 
+g = 32.174 ft/s^2
+h= 5 ft
+t = 0.558
 
 ### Shake-motion checks
 
